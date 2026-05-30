@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análise de Discurso: Reshoring & Sustentabilidade (2018–2025)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--card:#fff;--header:#0f3d3e;--accent:#2a9d8f;
+  --pos:#2ecc71;--neg:#e74c3c;--neu:#95a5a6;--gap:16px;--r:10px;
+  --grpA:#2a9d8f;--grpB:#e76f51;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:#222}
+.wrap{max-width:1440px;margin:0 auto;padding:var(--gap)}
+header{background:linear-gradient(135deg,#0f3d3e 0%,#1a5e5a 100%);color:#fff;padding:22px 28px;border-radius:var(--r);margin-bottom:var(--gap);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+header h1{font-size:18px;font-weight:700;letter-spacing:.3px}
+header p{font-size:12px;opacity:.75;margin-top:3px}
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filters label{font-size:11px;opacity:.75}
+.filters select{padding:5px 10px;border:1px solid rgba(255,255,255,.25);border-radius:5px;background:rgba(255,255,255,.12);color:#fff;font-size:12px;cursor:pointer}
+.filters select option{background:#0f3d3e}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+.kpi{background:var(--card);border-radius:var(--r);padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid var(--accent)}
+.kpi.pos{border-color:var(--pos)}.kpi.neg{border-color:var(--neg)}.kpi.neu{border-color:#f39c12}.kpi.grpB{border-color:var(--grpB)}
+.kpi-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi-value{font-size:26px;font-weight:800;color:#0f3d3e;line-height:1}
+.kpi-sub{font-size:12px;color:#aaa;margin-top:4px}
+.row{display:grid;gap:var(--gap);margin-bottom:var(--gap)}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:2fr 1fr 1fr}
+.row-full{grid-template-columns:1fr}
+.card{background:var(--card);border-radius:var(--r);padding:20px 22px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h3{font-size:13px;font-weight:700;color:#0f3d3e;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.card h3 span{font-size:10px;font-weight:400;color:#aaa;background:#f0f2f5;padding:2px 6px;border-radius:3px}
+canvas{max-height:280px}
+.table-wrap{overflow-x:auto;max-height:420px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{position:sticky;top:0;background:#f8f9fb;padding:9px 10px;text-align:left;border-bottom:2px solid #e0e0e0;color:#555;font-size:11px;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;white-space:nowrap;user-select:none;z-index:2}
+thead th:hover{background:#eef0f4}
+tbody td{padding:8px 10px;border-bottom:1px solid #f2f2f2;vertical-align:top}
+tbody tr:hover{background:#fafbfc}
+tbody td a{color:#0f3d3e;text-decoration:none}
+tbody td a:hover{text-decoration:underline}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.badge-pos{background:#d5f5e3;color:#1e8449}
+.badge-neg{background:#fde8e8;color:#c0392b}
+.badge-neu{background:#eaecee;color:#717d7e}
+.kw-pill{display:inline-block;background:#eef7f5;color:#0f6b5c;border-radius:4px;padding:1px 5px;font-size:10px;margin:1px}
+.heatmap{display:grid;gap:2px;font-size:11px}
+.heat-label{padding:6px 8px;font-size:11px;color:#555;font-weight:600;text-align:left}
+.heat-label.col{writing-mode:vertical-rl;transform:rotate(180deg);text-align:right;padding:8px 4px}
+.heat-cell{padding:10px 6px;text-align:center;font-weight:700;font-size:11px;border-radius:3px;cursor:default}
+.topic-word{display:inline-block;background:#e8f5f2;color:#0f6b5c;border-radius:4px;padding:2px 8px;margin:2px;font-size:11px}
+.topic-block{margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0}
+.topic-block:last-child{border-bottom:none}
+.topic-block h4{font-size:12px;color:#0f3d3e;margin-bottom:4px}
+.section-title{font-size:13px;font-weight:700;color:#0f3d3e;margin:8px 0 12px;padding-bottom:6px;border-bottom:2px solid #e8ecf0}
+footer{text-align:center;font-size:11px;color:#bbb;padding:16px;margin-top:8px}
+.legend-inline{display:flex;gap:10px;align-items:center;font-size:10px;color:#777;margin-top:6px}
+.legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+@media(max-width:900px){.row-2,.row-3{grid-template-columns:1fr}}
+/* ── novas seções: tabela tópico×sentimento, semantic ── */
+.topic-table{width:100%;border-collapse:collapse;font-size:12px}
+.topic-table th{background:#0f3d3e;color:#fff;padding:9px 11px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;position:static}
+.topic-table td{padding:9px 11px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.topic-table tr:nth-child(even) td{background:#fafbfc}
+.topic-table tr:hover td{background:#eef7f5}
+.tt-name{font-weight:700}
+.tt-words{font-size:10px;color:#999;margin-top:3px;font-weight:400}
+.bar-stacked{display:flex;width:100%;height:18px;border-radius:3px;overflow:hidden;background:#f0f0f0}
+.bar-stacked > span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;text-shadow:0 0 2px rgba(0,0,0,.3)}
+.pct-pos{color:#1e8449;font-weight:700}.pct-neu{color:#717d7e;font-weight:700}.pct-neg{color:#c0392b;font-weight:700}
+.compound-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;color:#fff}
+.mapping-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.mapping-card{background:#f8f9fb;border-left:3px solid var(--accent);padding:8px 12px;border-radius:6px}
+.mapping-card h4{font-size:11px;color:#0f3d3e;font-weight:700;margin-bottom:5px}
+.mapping-pill{display:inline-block;background:#e8f5f2;color:#0f6b5c;border-radius:10px;padding:1px 7px;font-size:10px;margin:1px 3px 1px 0;font-family:'SF Mono','Consolas',monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>📊 Análise de Discurso: Reshoring & Sustentabilidade no Twitter/X</h1>
+    <p>Dataset consolidado 2018–2025 · <b>3,555</b> tweets · 2018-01-02 00:00:00 → 2025-12-31 00:00:00</p>
+  </div>
+  <div class="filters">
+    <label>Filtrar por ano:</label>
+    <select id="filtroAno" onchange="applyFilter()">
+      <option value="all">Todos os anos</option>
+      <option value="2018">2018</option><option value="2019">2019</option><option value="2020">2020</option><option value="2021">2021</option><option value="2022">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option>
+    </select>
+  </div>
+</header>
+
+<!-- KPIs -->
+<div class="kpi-row" id="kpiRow"></div>
+
+<!-- Linha 1: Volume + Sentimento por ano -->
+<div class="row row-2">
+  <div class="card">
+    <h3>📈 Volume de Tweets por Ano <span>tweets/ano</span></h3>
+    <canvas id="chartVol"></canvas>
+  </div>
+  <div class="card">
+    <h3>🎭 Sentimento ao Longo do Tempo <span>compound VADER + %</span></h3>
+    <canvas id="chartSent"></canvas>
+  </div>
+</div>
+
+<!-- Linha 2: Distribuição sentimento + Tópicos -->
+<div class="row row-2">
+  <div class="card">
+    <h3>🥧 Distribuição de Sentimento <span>VADER</span></h3>
+    <canvas id="chartSentDist" style="max-height:240px"></canvas>
+  </div>
+  <div class="card">
+    <h3>🗂️ Distribuição de Tópicos (LDA) <span>6 tópicos</span></h3>
+    <canvas id="chartTopics"></canvas>
+  </div>
+</div>
+
+<!-- NOVA Linha: Tabela LDA × Sentimento -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>🎭 Tabela: Tópicos LDA × Sentimento <span>% por tópico (linhas somam 100%)</span></h3>
+  <p style="font-size:11px;color:#888;margin:-6px 0 12px">Distribuição de sentimento (VADER) entre os tweets atribuídos a cada tópico latente. Compound médio em -1 (muito negativo) a +1 (muito positivo).</p>
+  <div style="overflow-x:auto">
+    <table class="topic-table">
+      <thead>
+        <tr>
+          <th style="width:24%">Tópico</th>
+          <th style="width:7%">Total</th>
+          <th style="width:8%">% Pos.</th>
+          <th style="width:8%">% Neu.</th>
+          <th style="width:8%">% Neg.</th>
+          <th style="width:33%">Distribuição visual</th>
+          <th style="width:12%">Compound médio</th>
+        </tr>
+      </thead>
+      <tbody id="topicSentTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Linha 3: Top keywords (semantic) + Cooc pairs -->
+<div class="row row-2">
+  <div class="card">
+    <h3>🔑 Top Palavras-chave (agrupadas semanticamente) <span>13 grupos · com totais</span></h3>
+    <p style="font-size:11px;color:#888;margin:-6px 0 8px">Termos equivalentes consolidados — ex.: <code>carbon</code> + <code>co2</code> + <code>carbono</code> + <code>GHG</code> + <code>decarbonization</code> → <b>Carbon Footprint</b>. Barra empilhada por sentimento; rótulo final = total de tweets.</p>
+    <canvas id="chartKW" style="max-height:430px"></canvas>
+  </div>
+  <div class="card">
+    <h3>🔗 Top Co-ocorrências <span>pares reshoring × sustentabilidade</span></h3>
+    <canvas id="chartCooc" style="max-height:430px"></canvas>
+  </div>
+</div>
+
+<!-- Linha 4: Evolução top kw + Tópicos por ano -->
+<div class="row row-2">
+  <div class="card">
+    <h3>📅 Evolução das Top Palavras-chave <span>top 6 geral</span></h3>
+    <canvas id="chartKWEvol"></canvas>
+  </div>
+  <div class="card">
+    <h3>📅 Distribuição de Tópicos por Ano <span>LDA stacked 100%</span></h3>
+    <canvas id="chartTopicYear"></canvas>
+  </div>
+</div>
+
+<!-- Linha 5: Tópicos + heatmap semântico -->
+<div class="row row-2">
+  <div class="card">
+    <h3>🧠 Palavras por Tópico (LDA)</h3>
+    <div id="topicWords"></div>
+  </div>
+  <div class="card">
+    <h3>🌡️ Heatmap de Co-ocorrência Semântica <span>13 × 13 grupos · escala log</span></h3>
+    <p style="font-size:11px;color:#888;margin:-6px 0 8px">Co-ocorrência entre grupos consolidados. Clusters fortes esperados: <b>Carbon Footprint × Emissions × Offshoring</b> (eixo ambiental) e <b>Supply Chain × Reshoring × Nearshoring</b> (eixo estratégico).</p>
+    <div id="heatmap"></div>
+    <div class="legend-inline">
+      <span><span class="legend-dot" style="background:#e8f5f2"></span>baixo</span>
+      <span><span class="legend-dot" style="background:#2a9d8f"></span>médio</span>
+      <span><span class="legend-dot" style="background:#0f3d3e"></span>alto</span>
+    </div>
+  </div>
+</div>
+
+<!-- Linha 6: Dicionário semântico -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>📚 Dicionário de Agrupamento Semântico <span>termos originais → grupo</span></h3>
+  <p style="font-size:11px;color:#888;margin:-6px 0 12px">Mapeamento usado para consolidar variantes ortográficas, traduções (PT/EN) e sinônimos. Etapa pré-ontológica (futura formalização SKOS/OWL).</p>
+  <div class="mapping-grid" id="mappingGrid"></div>
+</div>
+
+<!-- Top tweets -->
+<div class="card" style="margin-bottom:var(--gap)">
+  <h3>🏆 Top 50 Tweets por Engajamento</h3>
+  <div class="table-wrap">
+    <table id="tweetTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable('Data')">Data ↕</th>
+          <th onclick="sortTable('Ano')">Ano ↕</th>
+          <th>Texto</th>
+          <th onclick="sortTable('Retweets')">RT ↕</th>
+          <th onclick="sortTable('Curtidas')">❤️ ↕</th>
+          <th onclick="sortTable('Respostas')">💬 ↕</th>
+          <th onclick="sortTable('Eng')">Eng. total ↕</th>
+          <th>Sentimento</th>
+          <th>Tópico</th>
+          <th>Palavras-chave</th>
+        </tr>
+      </thead>
+      <tbody id="tweetBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>TCC · Análise de Discurso Computacional · Dataset Twitter/X 2018–2025 · Reshoring & Sustentabilidade · Pipeline: Spiders + VADER + LDA + Chart.js</footer>
+</div>
+
+<script>
+const DATA = {"vol_ano": {"2018": 273, "2019": 338, "2020": 456, "2021": 529, "2022": 536, "2023": 468, "2024": 403, "2025": 552}, "vol_ano_mes": [{"ano": "2018", "mes": 1, "count": 8}, {"ano": "2018", "mes": 2, "count": 9}, {"ano": "2018", "mes": 3, "count": 45}, {"ano": "2018", "mes": 4, "count": 13}, {"ano": "2018", "mes": 5, "count": 16}, {"ano": "2018", "mes": 6, "count": 29}, {"ano": "2018", "mes": 7, "count": 17}, {"ano": "2018", "mes": 8, "count": 9}, {"ano": "2018", "mes": 9, "count": 9}, {"ano": "2018", "mes": 10, "count": 46}, {"ano": "2018", "mes": 11, "count": 31}, {"ano": "2018", "mes": 12, "count": 41}, {"ano": "2019", "mes": 1, "count": 15}, {"ano": "2019", "mes": 2, "count": 23}, {"ano": "2019", "mes": 3, "count": 17}, {"ano": "2019", "mes": 4, "count": 27}, {"ano": "2019", "mes": 5, "count": 51}, {"ano": "2019", "mes": 6, "count": 43}, {"ano": "2019", "mes": 7, "count": 18}, {"ano": "2019", "mes": 8, "count": 13}, {"ano": "2019", "mes": 9, "count": 37}, {"ano": "2019", "mes": 10, "count": 27}, {"ano": "2019", "mes": 11, "count": 25}, {"ano": "2019", "mes": 12, "count": 42}, {"ano": "2020", "mes": 1, "count": 3}, {"ano": "2020", "mes": 2, "count": 11}, {"ano": "2020", "mes": 3, "count": 39}, {"ano": "2020", "mes": 4, "count": 35}, {"ano": "2020", "mes": 5, "count": 51}, {"ano": "2020", "mes": 6, "count": 67}, {"ano": "2020", "mes": 7, "count": 14}, {"ano": "2020", "mes": 8, "count": 30}, {"ano": "2020", "mes": 9, "count": 25}, {"ano": "2020", "mes": 10, "count": 47}, {"ano": "2020", "mes": 11, "count": 41}, {"ano": "2020", "mes": 12, "count": 93}, {"ano": "2021", "mes": 1, "count": 12}, {"ano": "2021", "mes": 2, "count": 16}, {"ano": "2021", "mes": 3, "count": 30}, {"ano": "2021", "mes": 4, "count": 66}, {"ano": "2021", "mes": 5, "count": 42}, {"ano": "2021", "mes": 6, "count": 110}, {"ano": "2021", "mes": 7, "count": 18}, {"ano": "2021", "mes": 8, "count": 17}, {"ano": "2021", "mes": 9, "count": 21}, {"ano": "2021", "mes": 10, "count": 37}, {"ano": "2021", "mes": 11, "count": 55}, {"ano": "2021", "mes": 12, "count": 105}, {"ano": "2022", "mes": 1, "count": 12}, {"ano": "2022", "mes": 2, "count": 24}, {"ano": "2022", "mes": 3, "count": 34}, {"ano": "2022", "mes": 4, "count": 35}, {"ano": "2022", "mes": 5, "count": 44}, {"ano": "2022", "mes": 6, "count": 91}, {"ano": "2022", "mes": 7, "count": 20}, {"ano": "2022", "mes": 8, "count": 19}, {"ano": "2022", "mes": 9, "count": 22}, {"ano": "2022", "mes": 10, "count": 39}, {"ano": "2022", "mes": 11, "count": 81}, {"ano": "2022", "mes": 12, "count": 115}, {"ano": "2023", "mes": 2, "count": 1}, {"ano": "2023", "mes": 3, "count": 5}, {"ano": "2023", "mes": 4, "count": 10}, {"ano": "2023", "mes": 5, "count": 45}, {"ano": "2023", "mes": 6, "count": 177}, {"ano": "2023", "mes": 7, "count": 1}, {"ano": "2023", "mes": 8, "count": 3}, {"ano": "2023", "mes": 9, "count": 15}, {"ano": "2023", "mes": 10, "count": 20}, {"ano": "2023", "mes": 11, "count": 58}, {"ano": "2023", "mes": 12, "count": 133}, {"ano": "2024", "mes": 1, "count": 1}, {"ano": "2024", "mes": 2, "count": 3}, {"ano": "2024", "mes": 3, "count": 5}, {"ano": "2024", "mes": 4, "count": 21}, {"ano": "2024", "mes": 5, "count": 43}, {"ano": "2024", "mes": 6, "count": 136}, {"ano": "2024", "mes": 8, "count": 2}, {"ano": "2024", "mes": 9, "count": 4}, {"ano": "2024", "mes": 10, "count": 22}, {"ano": "2024", "mes": 11, "count": 66}, {"ano": "2024", "mes": 12, "count": 100}, {"ano": "2025", "mes": 1, "count": 2}, {"ano": "2025", "mes": 2, "count": 3}, {"ano": "2025", "mes": 3, "count": 23}, {"ano": "2025", "mes": 4, "count": 38}, {"ano": "2025", "mes": 5, "count": 73}, {"ano": "2025", "mes": 6, "count": 115}, {"ano": "2025", "mes": 7, "count": 6}, {"ano": "2025", "mes": 8, "count": 16}, {"ano": "2025", "mes": 9, "count": 33}, {"ano": "2025", "mes": 10, "count": 68}, {"ano": "2025", "mes": 11, "count": 51}, {"ano": "2025", "mes": 12, "count": 124}], "kw_freq": {"supply chain": 1690, "reshoring": 824, "offshoring": 804, "nearshoring": 638, "relocation": 541, "carbon": 497, "sustainability": 320, "emission": 305, "friendshoring": 240, "CO2": 166, "manufacturing strategy": 134, "producao local": 117, "climate": 116, "sustentabilidade": 67, "carbon footprint": 61, "supply chain relocation": 53, "deslocalizacao": 42, "carbono": 40, "climate change": 39, "life cycle": 37, "decarbonization": 33, "clima": 32, "lifecycle": 27, "GHG": 19, "low carbon": 18, "location strategy": 17, "emissao": 9, "pollutant": 7, "backshoring": 7, "descarbonizacao": 6}, "kw_by_year": {"supply chain": {"2018": 108, "2019": 91, "2020": 240, "2021": 264, "2022": 259, "2023": 224, "2024": 173, "2025": 331}, "reshoring": {"2018": 50, "2019": 32, "2020": 118, "2021": 115, "2022": 131, "2023": 121, "2024": 119, "2025": 138}, "offshoring": {"2018": 87, "2019": 137, "2020": 139, "2021": 113, "2022": 82, "2023": 41, "2024": 120, "2025": 85}, "nearshoring": {"2018": 32, "2019": 15, "2020": 49, "2021": 76, "2022": 109, "2023": 138, "2024": 76, "2025": 143}, "relocation": {"2018": 63, "2019": 75, "2020": 57, "2021": 90, "2022": 95, "2023": 57, "2024": 31, "2025": 73}, "carbon": {"2018": 29, "2019": 97, "2020": 60, "2021": 66, "2022": 79, "2023": 52, "2024": 70, "2025": 44}, "sustainability": {"2018": 49, "2019": 25, "2020": 33, "2021": 35, "2022": 46, "2023": 44, "2024": 40, "2025": 48}, "emission": {"2018": 18, "2019": 72, "2020": 38, "2021": 45, "2022": 35, "2023": 28, "2024": 41, "2025": 28}, "friendshoring": {"2018": 0, "2019": 0, "2020": 0, "2021": 3, "2022": 67, "2023": 76, "2024": 31, "2025": 63}, "CO2": {"2018": 15, "2019": 40, "2020": 17, "2021": 23, "2022": 9, "2023": 21, "2024": 27, "2025": 14}}, "top10_kws": ["supply chain", "reshoring", "offshoring", "nearshoring", "relocation", "carbon", "sustainability", "emission", "friendshoring", "CO2"], "cooc_top20": [{"k1": "reshoring", "k2": "supply chain", "count": 581}, {"k1": "nearshoring", "k2": "supply chain", "count": 413}, {"k1": "carbon", "k2": "offshoring", "count": 314}, {"k1": "offshoring", "k2": "supply chain", "count": 232}, {"k1": "emission", "k2": "offshoring", "count": 232}, {"k1": "carbon", "k2": "emission", "count": 186}, {"k1": "relocation", "k2": "supply chain", "count": 183}, {"k1": "friendshoring", "k2": "supply chain", "count": 173}, {"k1": "relocation", "k2": "sustainability", "count": 123}, {"k1": "CO2", "k2": "offshoring", "count": 119}, {"k1": "carbon", "k2": "relocation", "count": 103}, {"k1": "nearshoring", "k2": "reshoring", "count": 100}, {"k1": "manufacturing strategy", "k2": "supply chain", "count": 95}, {"k1": "nearshoring", "k2": "sustainability", "count": 68}, {"k1": "reshoring", "k2": "sustainability", "count": 67}, {"k1": "CO2", "k2": "emission", "count": 64}, {"k1": "producao local", "k2": "sustentabilidade", "count": 63}, {"k1": "carbon", "k2": "climate", "count": 62}, {"k1": "carbon", "k2": "carbon footprint", "count": 61}, {"k1": "climate", "k2": "offshoring", "count": 58}], "cooc_matrix": [[0, 581, 232, 413, 183, 18, 23, 11, 173, 0, 95, 0, 12, 0, 4], [581, 0, 26, 100, 2, 17, 67, 9, 29, 6, 0, 0, 4, 0, 7], [232, 26, 0, 24, 0, 314, 29, 232, 9, 119, 0, 0, 58, 0, 36], [413, 100, 24, 0, 4, 15, 68, 14, 32, 5, 1, 0, 1, 0, 1], [183, 2, 0, 4, 0, 103, 123, 42, 1, 31, 7, 0, 33, 0, 13], [18, 17, 314, 15, 103, 0, 16, 186, 15, 20, 9, 0, 62, 0, 61], [23, 67, 29, 68, 123, 16, 0, 10, 6, 3, 2, 0, 10, 0, 7], [11, 9, 232, 14, 42, 186, 10, 0, 1, 64, 0, 0, 32, 0, 8], [173, 29, 9, 32, 1, 15, 6, 1, 0, 1, 0, 0, 14, 0, 0], [0, 6, 119, 5, 31, 20, 3, 64, 1, 0, 0, 3, 19, 0, 3], [95, 0, 0, 1, 7, 9, 2, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 63, 0], [12, 4, 58, 1, 33, 62, 10, 32, 14, 19, 0, 0, 0, 0, 3], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0], [4, 7, 36, 1, 13, 61, 7, 8, 0, 3, 1, 0, 3, 0, 0]], "cooc_labels": ["supply chain", "reshoring", "offshoring", "nearshoring", "relocation", "carbon", "sustainability", "emission", "friendshoring", "CO2", "manufacturing strategy", "producao local", "climate", "sustentabilidade", "carbon footprint"], "sent_dist": {"Positivo": 1746, "Negativo": 926, "Neutro": 883}, "sent_by_year": {"2018": {"Positivo": 133, "Neutro": 71, "Negativo": 69}, "2019": {"Positivo": 149, "Neutro": 93, "Negativo": 96}, "2020": {"Positivo": 220, "Neutro": 113, "Negativo": 123}, "2021": {"Positivo": 254, "Neutro": 111, "Negativo": 164}, "2022": {"Positivo": 251, "Neutro": 153, "Negativo": 132}, "2023": {"Positivo": 234, "Neutro": 137, "Negativo": 97}, "2024": {"Positivo": 202, "Neutro": 104, "Negativo": 97}, "2025": {"Positivo": 303, "Neutro": 101, "Negativo": 148}}, "avg_sent_year": {"2018": 0.1185, "2019": 0.0979, "2020": 0.1364, "2021": 0.0954, "2022": 0.1274, "2023": 0.176, "2024": 0.1562, "2025": 0.1935}, "topic_words": [["supply", "chain", "reshoring", "china", "friendshoring", "trade", "manufacturing", "global", "india", "tariffs"], ["relocation", "sustainability", "business", "focus", "read", "carbon", "trade", "climate", "global", "full"], ["offshoring", "carbon", "emissions", "china", "countries", "production", "footprint", "zero", "energy", "manufacturing"], ["supply", "chain", "manufacturing", "reshoring", "nearshoring", "strategy", "supplychain", "companies", "global", "operations"], ["jobs", "offshoring", "years", "nearshoring", "production", "companies", "back", "change", "over", "sustainability"], ["nearshoring", "supply", "chain", "mexico", "local", "reshoring", "produção", "america", "global", "industry"]], "topic_dist": {"1": 859, "2": 361, "3": 615, "4": 873, "5": 284, "6": 563}, "topic_by_year": {"2018": {"1": 37, "2": 48, "3": 39, "4": 87, "5": 37, "6": 25}, "2019": {"1": 40, "2": 50, "3": 143, "4": 53, "5": 28, "6": 24}, "2020": {"1": 100, "2": 29, "3": 86, "4": 151, "5": 31, "6": 59}, "2021": {"1": 133, "2": 48, "3": 88, "4": 156, "5": 29, "6": 75}, "2022": {"1": 111, "2": 79, "3": 69, "4": 128, "5": 47, "6": 102}, "2023": {"1": 129, "2": 38, "3": 44, "4": 114, "5": 46, "6": 97}, "2024": {"1": 96, "2": 32, "3": 87, "4": 83, "5": 29, "6": 76}, "2025": {"1": 213, "2": 37, "3": 59, "4": 101, "5": 37, "6": 105}}, "top_tweets": [{"Data": "2019-07-14 00:00:00", "Ano": "2019", "text": "Over the last two decades the UK has reduced emissions – but it has done so in part by offshoring those emissions.\n\nThat isn’t tackling global emissions – it is passing the buck to poorer countries.\n\nhttps://t.co/8lMKaSwGE1", "Retweets": 950, "Curtidas": 2683, "sentimento": "Negativo", "topic": 3, "kw": "offshoring; emission", "url": "https://twitter.com/jeremycorbyn/status/1150374633771659264", "Respostas": 203, "Eng": 3836}, {"Data": "2023-06-24 00:00:00", "Ano": "2023", "text": "Who set the Fed’s 2% target rate? Why is it sacrosanct as opposed to setting it at 3% given the modern need for strategic reshoring, decarbonization, and wage increases for the working class? Would love Econ Twitter to chime in why we can’t land the plan softly at 3 percent.", "Retweets": 133, "Curtidas": 1169, "sentimento": "Positivo", "topic": 1, "kw": "reshoring; decarbonization", "url": "https://twitter.com/RoKhanna/status/1672701940608663556", "Respostas": 330, "Eng": 1632}, {"Data": "2021-06-08 00:00:00", "Ano": "2021", "text": "The pandemic uncovered alarming structural weaknesses in our supply chains. These weaknesses threaten America’s economic &amp; national security &amp; I am pleased to see @POTUS making a domestic supply of critical materials a priority. https://t.co/yIAXx765ka", "Retweets": 259, "Curtidas": 1384, "sentimento": "Negativo", "topic": 1, "kw": "", "url": "https://twitter.com/RepSwalwell/status/1402318021536931843", "Respostas": 68, "Eng": 1711}, {"Data": "2021-11-24 00:00:00", "Ano": "2021", "text": "Decoupling.\n\nMany countries have managed to grow their economies while reducing CO₂ emissions.\n\nAnd it's not just about offshoring emissions overseas. Consumption-based CO₂ is also falling.\n\nExplore the data for any country in our interactive chart: https://t.co/mjZ11vjk6U https://t.co/Z2iyxq3RzP", "Retweets": 146, "Curtidas": 668, "sentimento": "Negativo", "topic": 3, "kw": "offshoring; emission", "url": "https://twitter.com/_HannahRitchie/status/1463446617667911681", "Respostas": 28, "Eng": 842}, {"Data": "2022-11-17 00:00:00", "Ano": "2022", "text": "A lot has been written recently about semiconductor supply chain diversification, the US CHIPS Act, the EU CHIPS Act, onshoring, friendshoring, the Chips 4 Alliance, and semiconductor industrial policies in Japan, South Korea, and Taiwan. A thread.", "Retweets": 148, "Curtidas": 465, "sentimento": "Neutro", "topic": 1, "kw": "friendshoring; supply chain", "url": "https://twitter.com/pstAsiatech/status/1593287926430937089", "Respostas": 21, "Eng": 634}, {"Data": "2021-08-26 00:00:00", "Ano": "2021", "text": "Offshoring our supply chains to China and then picking a fight with China is leading to sustained supply chain problems...INCONCEIVABLE!", "Retweets": 51, "Curtidas": 472, "sentimento": "Negativo", "topic": 1, "kw": "offshoring; supply chain", "url": "https://twitter.com/LukeGromen/status/1430687249151168518", "Respostas": 34, "Eng": 557}, {"Data": "2022-03-26 00:00:00", "Ano": "2022", "text": "For those who paid attention to the supply chain thread from yesterday, it only paints one part of the story. Since 80s offshoring has allowed to drive-down inflation =&gt; drive down interest rates =&gt; drive down corporate tax rates. This whole chain is upended. \n1/2", "Retweets": 0, "Curtidas": 543, "sentimento": "Positivo", "topic": 3, "kw": "offshoring; supply chain", "url": "https://twitter.com/INArteCarloDoss/status/1507731789187592194", "Respostas": 19, "Eng": 562}, {"Data": "2021-12-15 00:00:00", "Ano": "2021", "text": "O Projeto da Zona de Desenvolvimento Sustentável (ZDS) Abunã-Madeira, lançado hoje em Porto Velho/RO, é uma proposta inovadora, que concilia desenvolvimento e sustentabilidade, potencializando a produção local e materiais da Amazônia.\nParabéns à SUDAM, SUFRAMA e Gov AC, AM e RO. https://t.co/CYXmgzewIe", "Retweets": 48, "Curtidas": 432, "sentimento": "Neutro", "topic": 6, "kw": "producao local; sustentabilidade", "url": "https://twitter.com/GeneralMourao/status/1470909208535220231", "Respostas": 31, "Eng": 511}, {"Data": "2021-06-08 00:00:00", "Ano": "2021", "text": "Biden reveals plan to solve crippling shortages of computer chips, batteries, and medicine https://t.co/yujpcLc3rp", "Retweets": 82, "Curtidas": 267, "sentimento": "Positivo", "topic": 1, "kw": "", "url": "https://twitter.com/insiderpolitics/status/1402292174620930050", "Respostas": 0, "Eng": 349}, {"Data": "2021-11-10 00:00:00", "Ano": "2021", "text": "Isn’t it beyond rotten that the same reactionary folks, who supported offshoring entire factories and jobs as CEOs got richer as they turned the US economy into a service economy, are now in a mouth breathing frenzy because of supply chain issues and bottlenecks at our seaport?", "Retweets": 89, "Curtidas": 196, "sentimento": "Neutro", "topic": 6, "kw": "offshoring; supply chain", "url": "https://twitter.com/undefined/status/1458417880526110724", "Respostas": 23, "Eng": 308}, {"Data": "2019-05-12 00:00:00", "Ano": "2019", "text": "Blowing up your global supply chain and reshoring uneconomic and non-existent factories is not what I would call “simple.”", "Retweets": 59, "Curtidas": 246, "sentimento": "Neutro", "topic": 6, "kw": "reshoring; supply chain", "url": "https://twitter.com/EconomyBen/status/1127547670661349376", "Respostas": 18, "Eng": 323}, {"Data": "2024-06-30 00:00:00", "Ano": "2024", "text": "The Philippines is scouting for western investment to further develop its nickel reserves, pitching itself as an alternative to the China-dominated supply chain for the critical battery metal. #friendshoring  https://t.co/JJ68mXWz0m", "Retweets": 70, "Curtidas": 223, "sentimento": "Negativo", "topic": 1, "kw": "friendshoring; supply chain", "url": "https://twitter.com/SariArhoHavren/status/1807354699500134755", "Respostas": 22, "Eng": 315}, {"Data": "2022-04-06 00:00:00", "Ano": "2022", "text": "The pandemic made it so it's more expensive to produce the same amount of goods. \n\nAdding more variations of products makes it even more expensive, so a key manufacturing strategy has been to reduce product variety.\n\nhttps://t.co/iiBotfAvuo https://t.co/M9UvziyeBU", "Retweets": 70, "Curtidas": 150, "sentimento": "Neutro", "topic": 3, "kw": "manufacturing strategy", "url": "https://twitter.com/BusinessInsider/status/1511821447420907523", "Respostas": 0, "Eng": 220}, {"Data": "2025-10-15 00:00:00", "Ano": "2025", "text": "Yes, &amp; it's worse than this\n\nHalf of the UK's decarbonisation since the Climate Change Act has been achieved by offshoring emissions\n\nThat means importing fossil fuels produced abroad or importing goods manufactured with carbon emitting processes\n\nWe just moved the emissions.", "Retweets": 48, "Curtidas": 246, "sentimento": "Negativo", "topic": 3, "kw": "offshoring; emission; carbon; decarbonization; climate change; climate", "url": "https://twitter.com/gavinantonyrice/status/1978382510066221525", "Respostas": 13, "Eng": 307}, {"Data": "2024-11-20 00:00:00", "Ano": "2024", "text": "No you’re not fixing anything, your wasting 30 billion annually on net zero, 22 billion carbon capture when trees do this for nothing, your offshoring U.K. emissions and jobs, crippling our defence, farmers, pensioners, students, while importing state dependents, 3.3 million migrants claimed benefits since 2019, 50k per month and counting, while you tax the hell out of us, you  have broke every promise you made . Get starmer and Reeves out. Before they start war with Russia using our long range missiles for non NATO country.", "Retweets": 26, "Curtidas": 284, "sentimento": "Negativo", "topic": 3, "kw": "offshoring; emission; carbon", "url": "https://twitter.com/NorthBritannia/status/1859279341642756215", "Respostas": 3, "Eng": 313}, {"Data": "2021-12-27 00:00:00", "Ano": "2021", "text": "Sorry but it’s not just fiscal policy driving supply chain crises, it’s the massive offshoring over forty years.", "Retweets": 35, "Curtidas": 237, "sentimento": "Neutro", "topic": 5, "kw": "offshoring; supply chain", "url": "https://twitter.com/matthewstoller/status/1475290337170137091", "Respostas": 4, "Eng": 276}, {"Data": "2019-11-26 00:00:00", "Ano": "2019", "text": "I got lucky today. \n\nMrs McGuinness in the Chair (a lady who is v fair and in possession of a great sense of humour)\n\nClimate Polices lack clear economic thinking and we are merely offshoring our CO2 and jobs to China. \n\nCohesion funding will be required for Germany very soon https://t.co/zyXyIilzuo", "Retweets": 57, "Curtidas": 122, "sentimento": "Positivo", "topic": 5, "kw": "offshoring; CO2; climate", "url": "https://twitter.com/RowlandBrexitSE/status/1199280609916588033", "Respostas": 46, "Eng": 225}, {"Data": "2025-05-07 00:00:00", "Ano": "2025", "text": "The \"Made in China\" era is officially over.\n\nFor the first time, Mexico has surpassed China as America's top trading partner.\n\nA 2024 Kearney report shows the largest annual spike in reshoring activity to date.\n\nHere's what's causing the supply chain revolution 🧵: https://t.co/YLMCCNtgeN", "Retweets": 47, "Curtidas": 183, "sentimento": "Positivo", "topic": 6, "kw": "reshoring; supply chain", "url": "https://twitter.com/ChrisContrado/status/1920154199524061321", "Respostas": 15, "Eng": 245}, {"Data": "2020-09-08 00:00:00", "Ano": "2020", "text": "Fascinating new McKinsey report on global supply chain resilience. Among other things, it really shows the GSCs' insane complexity (and the insanity of politicians' simplistic reshoring plans): https://t.co/ZQ98xRAbcE https://t.co/F5dbH4Jjn6", "Retweets": 48, "Curtidas": 170, "sentimento": "Negativo", "topic": 4, "kw": "reshoring; supply chain", "url": "https://twitter.com/scottlincicome/status/1303457727155503105", "Respostas": 3, "Eng": 221}, {"Data": "2021-05-18 00:00:00", "Ano": "2021", "text": "Voting closes on Friday 8pm, \nPLEASE VOTE  for Relocation Strategies in the WBENC national Pitch contest for sustainable products, our Patent Pending ReloShield Stackers for cubes, Grand prize is 20k, 2nd is 10k \nGod Bless 🙏 Thank You!! #FutureofWork https://t.co/RAdYjjILU4", "Retweets": 24, "Curtidas": 213, "sentimento": "Positivo", "topic": 2, "kw": "relocation; sustainability", "url": "https://twitter.com/ReloStrategies/status/1394756933584887814", "Respostas": 9, "Eng": 246}, {"Data": "2021-06-08 00:00:00", "Ano": "2021", "text": "The Biden administration is on the case.\n\nThe White House just rolled out a sweeping plan to heal pandemic-slammed supply chains and address shortages of critical products as the country reopens.\nhttps://t.co/mV3UGwxGst", "Retweets": 45, "Curtidas": 171, "sentimento": "Negativo", "topic": 4, "kw": "", "url": "https://twitter.com/KJP46/status/1402311042198392839", "Respostas": 3, "Eng": 219}, {"Data": "2021-11-22 00:00:00", "Ano": "2021", "text": "I’m writing my 2022 outlook and refining my outlook of possibilities out to 2050.\n\nMajor themes:\n1. Supply chain\n2. Population changes\n3. Demographic shifts\n4. Digital assets adoption\n5. Money printing\n6. Food security\n7. Populism\n8. Decentralization offline/online\n9. Reshoring", "Retweets": 33, "Curtidas": 181, "sentimento": "Positivo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/AoverK/status/1462582381580369923", "Respostas": 6, "Eng": 220}, {"Data": "2022-04-20 00:00:00", "Ano": "2022", "text": "IT'S CRAP: The #SaveHoneyHill Community Choir are protesting the unnecessary relocation of a fully functional sewage works to a beautiful, unspoilt #greenbelt site just outside #cambridge by @AnglianWater - Join us in our fight #sustainability https://t.co/Iu0yEjvazS #itsCrap", "Retweets": 51, "Curtidas": 76, "sentimento": "Negativo", "topic": 2, "kw": "relocation; sustainability", "url": "https://twitter.com/SaveHoneyHill1/status/1516788407497809921", "Respostas": 9, "Eng": 136}, {"Data": "2022-11-03 00:00:00", "Ano": "2022", "text": "North America's Reshoring Of The Global Supply Chain https://t.co/uyC0Z6ieX0", "Retweets": 27, "Curtidas": 139, "sentimento": "Neutro", "topic": 6, "kw": "reshoring; supply chain", "url": "https://twitter.com/zerohedge/status/1587970386674720768", "Respostas": 13, "Eng": 179}, {"Data": "2021-11-25 00:00:00", "Ano": "2021", "text": "The Liberals are content to let the planet burn while offshoring our jobs, making life unaffordable, dividing Canadians, and making us reliant on high carbon foreign energy. We need affordable low carbon alternatives, jobs, &amp; growth. There is a better way. https://t.co/MKXVpAniJy", "Retweets": 17, "Curtidas": 156, "sentimento": "Positivo", "topic": 3, "kw": "offshoring; carbon; low carbon", "url": "https://twitter.com/MichelleRempel/status/1463960687751970818", "Respostas": 0, "Eng": 173}, {"Data": "2022-10-12 00:00:00", "Ano": "2022", "text": "Let's quickly review the setup here.\n\n- Energy inputs: scarcer, and probably more expensive to get your hands on\n\n- Labor inputs: given the supply chain issues, at least some reshoring to be expected = costs up\n\n- (External) funding costs: skyrocketing at the moment\n\n...\n\n14/", "Retweets": 3, "Curtidas": 198, "sentimento": "Positivo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/MacroAlf/status/1580228101849509889", "Respostas": 1, "Eng": 202}, {"Data": "2024-11-12 00:00:00", "Ano": "2024", "text": "Het gasverbruik van de NL industrie is nu 25% lager dan voor de gascrisis. Vooral door lagere productie*, lees: offshoring.\nDe NL CO2-emissie daalt daardoor, wat soms als succes wordt gepresenteerd; maar het helpt het klimaat niet.\n#grafiekvandedag\n*zie: https://t.co/xtJbcfrSuC https://t.co/hmV9F3ExR1", "Retweets": 39, "Curtidas": 108, "sentimento": "Neutro", "topic": 3, "kw": "offshoring; CO2", "url": "https://twitter.com/BM_Visser/status/1856215095933841873", "Respostas": 11, "Eng": 158}, {"Data": "2022-12-30 00:00:00", "Ano": "2022", "text": "Offshoring of American industry has devastated communities. And the federal response has been only a Band-Aid.\n\nLet's pass my bill to fix our supply chain issues in the long term and invest in critical industries and good paying jobs at home.", "Retweets": 19, "Curtidas": 110, "sentimento": "Negativo", "topic": 4, "kw": "offshoring; supply chain", "url": "https://twitter.com/RoKhanna/status/1608900479571869697", "Respostas": 44, "Eng": 173}, {"Data": "2020-05-18 00:00:00", "Ano": "2020", "text": "Percebam: uma taxa de carbono inviabiliza o agronegócio e pecuária como são hoje; inviabiliza fósseis e fomenta renováveis.\n\nFomenta transporte alternativo, agroecologia, produção local, migração pro campo, produtos da floresta, conhecimentos tradicionais, serviços ambientais.", "Retweets": 5, "Curtidas": 175, "sentimento": "Neutro", "topic": 6, "kw": "producao local; carbono", "url": "https://twitter.com/andrearoeirap/status/1262432379081314304", "Respostas": 8, "Eng": 188}, {"Data": "2022-03-04 00:00:00", "Ano": "2022", "text": "O que precisa ficar claro é que a conquista da Amazônia deve ser feita de dentro para fora, de modo que os conflitos interestatais diretos se tornem dispensáveis\n\nA colonização formal de suas áreas, implica em compromissos sociais e sustentabilidade a partir da produção local ⬇️", "Retweets": 32, "Curtidas": 128, "sentimento": "Neutro", "topic": 6, "kw": "producao local; sustentabilidade", "url": "https://twitter.com/mendesluizpaulo/status/1499724426610458628", "Respostas": 1, "Eng": 161}, {"Data": "2024-12-18 00:00:00", "Ano": "2024", "text": "An incredible footnote to Germany's economic suicide—the deliberate destruction of their energy sector and ensuing offshoring of their manufacturing base to China—is that they capped it all off by purchasing a billion euros of carbon credits from a Chinese scam company https://t.co/5hQXTllRpc", "Retweets": 28, "Curtidas": 117, "sentimento": "Negativo", "topic": 1, "kw": "offshoring; carbon", "url": "https://twitter.com/skepticaliblog/status/1869516649520668747", "Respostas": 1, "Eng": 146}, {"Data": "2022-01-21 00:00:00", "Ano": "2022", "text": "#IntelOhio will have nationwide impacts. Decades of offshoring chip manufacturing led to supply-chain disruptions in the U.S. that crippled major sectors of the economy during the pandemic. #IntelOhio will help reverse this trend. https://t.co/sWXk0rAfQP #BuiltForThis https://t.co/txaZ9lwvyU", "Retweets": 28, "Curtidas": 107, "sentimento": "Positivo", "topic": 4, "kw": "offshoring", "url": "https://twitter.com/GovMikeDeWine/status/1484556396045684745", "Respostas": 9, "Eng": 144}, {"Data": "2021-11-23 00:00:00", "Ano": "2021", "text": "Then there's @rkuttnerwrites: \"The supply crunch in turn reflects the interaction of just-in-time production and extreme offshoring with a privatized and deregulated logistics system.\" Solutions must attack this reality. https://t.co/7YEfxQjzuF", "Retweets": 34, "Curtidas": 97, "sentimento": "Negativo", "topic": 3, "kw": "offshoring", "url": "https://twitter.com/ddayen/status/1463162565698232328", "Respostas": 1, "Eng": 132}, {"Data": "2020-04-02 00:00:00", "Ano": "2020", "text": "The #COVID19 pandemic is the moment of reckoning for the last three decades of elite consensus that stipulated globalization &amp; offshoring our supply chain to China was the path forward. This wreckage has been brought about by greed &amp; sheer ignorance of other cultures and politics", "Retweets": 32, "Curtidas": 86, "sentimento": "Negativo", "topic": 4, "kw": "offshoring; supply chain", "url": "https://twitter.com/andrewmichta/status/1245511706870243328", "Respostas": 7, "Eng": 125}, {"Data": "2022-05-05 00:00:00", "Ano": "2022", "text": "$DM is a pure play for supply chain disruption across metal, polymers, ceramics and elastomers!  Mass produce with additive to make borderless production real, enable inventory of 1, localization, reshoring and more sustainable production 🕶🚀", "Retweets": 22, "Curtidas": 118, "sentimento": "Negativo", "topic": 5, "kw": "reshoring; sustainability; supply chain", "url": "https://twitter.com/ricfulop/status/1522024702025293825", "Respostas": 10, "Eng": 150}, {"Data": "2022-03-02 00:00:00", "Ano": "2022", "text": "Allarghiamo l’orizzonte perché la transizione che abbiamo di fronte è notevole: cambio di paradigma economico accelerato da virus continua, più spesa pubblica nazionale e sovranazionale, più protezionismo, accorciamento delle supply chain, tentativi di reshoring.", "Retweets": 25, "Curtidas": 90, "sentimento": "Neutro", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/LorenzoCast89/status/1499118037319966724", "Respostas": 10, "Eng": 125}, {"Data": "2021-12-04 00:00:00", "Ano": "2021", "text": "Acemoglu discute la necessità di ridurre la globalizzazione delle catena del valore. \n1) ridurre i rischi sistemici per l'interruzione di un nodo;\n2) fermare l'aumento delle rendite delle imprese che comprime i salari e danneggia i lavoratori.\nhttps://t.co/wkdcK0boE4", "Retweets": 35, "Curtidas": 84, "sentimento": "Neutro", "topic": 1, "kw": "", "url": "https://twitter.com/AndreaRoventini/status/1467066219937288193", "Respostas": 6, "Eng": 125}, {"Data": "2021-11-01 00:00:00", "Ano": "2021", "text": "If we’re serious about reshoring manufacturing and building resiliency in our supply chain, we must raise the bar on our Buy American policies to help ensure taxpayer dollars go back into the U.S. economy. https://t.co/9ASs0aBg9v", "Retweets": 27, "Curtidas": 94, "sentimento": "Positivo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/SenDuckworth/status/1455243840042979337", "Respostas": 10, "Eng": 131}, {"Data": "2021-12-13 00:00:00", "Ano": "2021", "text": "Selling out your country, freezing your citizens, destroying EU carbon policies, dumping your power plant workers out of a job, offshoring your remaining energy-intensive industries, and discrediting green politics for a generation at least?\n\nPRICELESS", "Retweets": 19, "Curtidas": 104, "sentimento": "Negativo", "topic": 3, "kw": "offshoring; carbon", "url": "https://twitter.com/energybants/status/1470464915940982787", "Respostas": 4, "Eng": 127}, {"Data": "2019-05-22 00:00:00", "Ano": "2019", "text": "Fuga dai dazi: le imprese tagliano la produzione in Cina! Il reshoring c’è, le supply chain si accorciano comunque anche perché il just in time è + importante che il basso costo. Industria italiana è anche low-cost, un’opportunità da non perdere #muoviamoilculo 🙌🙏👍👏👊 https://t.co/CYoP23cNLv", "Retweets": 28, "Curtidas": 80, "sentimento": "Neutro", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/Forchielli/status/1131125566801944577", "Respostas": 10, "Eng": 118}, {"Data": "2025-10-20 00:00:00", "Ano": "2025", "text": "Thank you, OECD, for heroically sacrificing our economies starting in 2004 to \"save the planet\"... by offshoring production (and CO2 emissions) to the rest of non-OECD countries, especially Asian ones.\nIn addition to this general delocalization/offshoring of industry by the West since 2004, more than 90% of the world's rare earth processing and supply is carried out in China. It is a highly polluting process that consumes a lot of energy, with lax regulations that allow for cheap but polluting production. Just like with industry in general, Western countries outsource this process to reduce their CO2 footprint, but the emissions simply shift eastward, counted in China's totals, not those of the importers. Therefore, CO2 metrics based on total emissions favor countries that have delocalized/offshored their industries, ignoring consumption, which allows for an apparent \"decarbonization\" with no impact whatsoever at the planetary level. \n\nIf you believe that CO2 is really a pollutant (it's not) and that human CO2 emissions are the cause of climate change (they're not), true accountability by country would require accounting based on the product life cycle or, better yet, on consumption. But they will never do it or accept it because it would expose the complete hypocrisy of the West and the true hidden 2030 agenda of wealth extraction from the middle and lower classes by the upper ones.", "Retweets": 22, "Curtidas": 89, "sentimento": "Positivo", "topic": 3, "kw": "offshoring; emission; decarbonization; CO2; life cycle; pollutant; climate change; climate", "url": "https://twitter.com/Fynnderella1/status/1980316970525364644", "Respostas": 6, "Eng": 117}, {"Data": "2025-10-30 00:00:00", "Ano": "2025", "text": "My first interview with Saif Khawaja @khawajasn, Cofounder & CEO at Shinkei @ShinkeiSystems.\n\nShinkei is building fish harvesting robots with the goal of reshoring America's seafood supply chain while radically improving the quality & shelf life of the fish we consume. \n\nTheir Poseidon robot is scaling the traditional Japanese ike-jime method for killing fish which is humane and preserves texture, flavor, and freshness.\n\n0:42 Fish processing vs harvesting\n4:51 Creating Seremoni\n8:30 Expanding through word of mouth\n9:19 Starting Shinkei\n12:47 First few iterations of Poseidon\n16:49 Celebrating fisherman\n21:59 Helping fisherman make more money\n25:47 Why he started Shinkei\n27:09 First deployment\n29:56 Following your intuition\n32:01 Finding the right cofounder", "Retweets": 10, "Curtidas": 95, "sentimento": "Positivo", "topic": 5, "kw": "reshoring; supply chain", "url": "https://twitter.com/ti_morse/status/1983993990908456994", "Respostas": 9, "Eng": 114}, {"Data": "2024-11-13 00:00:00", "Ano": "2024", "text": "The US will pay a big price to get industry to come back here.\nThe real cost of supply chain reshoring is *much* higher than we are being told. And we have not started paying yet\nGermany already threw in the towel...", "Retweets": 10, "Curtidas": 90, "sentimento": "Negativo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/Sorenthek/status/1856713747563208829", "Respostas": 22, "Eng": 122}, {"Data": "2022-03-31 00:00:00", "Ano": "2022", "text": "\"There are steps that our commonwealth can take now that will instantly make us a more attractive location for manufacturers to grow and invest. We can lead the way once again in reshoring jobs to America and stabilizing our supply chains in the long run.\"\nhttps://t.co/Yq2fX0M2Y3", "Retweets": 16, "Curtidas": 74, "sentimento": "Positivo", "topic": 4, "kw": "reshoring", "url": "https://twitter.com/SenMastriano/status/1509637589309050887", "Respostas": 19, "Eng": 109}, {"Data": "2020-03-26 00:00:00", "Ano": "2020", "text": "The past couple of months trying to respond to the coronavirus have illuminated the dangers of relying on China for our medical supply chain. Nonetheless, a broad coalition of lobbying groups and nonprofits are opposing Trump's latest reshoring efforts.\n\nhttps://t.co/ar2XRhyDQy", "Retweets": 22, "Curtidas": 61, "sentimento": "Negativo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/ambermarieduke/status/1243012948869754881", "Respostas": 10, "Eng": 93}, {"Data": "2022-04-18 00:00:00", "Ano": "2022", "text": "friendshoring/ Janet Yellen (Tesoro Usa) ha coniato questo termine per indicare l'affidamento delle supply chain a un gran numero di Paesi amici che condividono norme e valori con i quali operare nel commercio globale", "Retweets": 21, "Curtidas": 66, "sentimento": "Positivo", "topic": 1, "kw": "friendshoring; supply chain", "url": "https://twitter.com/dariodivico/status/1515986627243524110", "Respostas": 8, "Eng": 95}, {"Data": "2025-04-08 00:00:00", "Ano": "2025", "text": "Guys, stop worrying about reshoring and supply chain issues—this is the biggest nothing burger in the discussion\n\nEveryone just pays the new 10% tariff base rate and takes the hit and keeps making things where they are. Everything above that is leverage for better deals\n\nAnd over time, regardless of negotiations, U.S. companies will gradually shift supply chains themselves due to geopolitical concerns—piece by piece over longer time horizons\n\nSame way the U.S. shocked Europe into upping defense spending—something no other President managed despite trying\n\nThe goal is not the end outcome - Restructuring and changing the general trajectory is the goal", "Retweets": 4, "Curtidas": 103, "sentimento": "Negativo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/0x_Kun/status/1909619335498547289", "Respostas": 6, "Eng": 113}, {"Data": "2025-12-13 00:00:00", "Ano": "2025", "text": "Our announcement with LS Cable & System demonstrates Virginia’s leadership in reshoring American manufacturing and securing critical supply chains. This $689 million investment will create 430 new jobs and a new and growing domestic supply chain for magnetic copper wire and rare earth magnets.\n\nBuilt with a trusted ally in South Korea, this project shows how economic growth and national security go hand in hand—and Virginia is leading the way.", "Retweets": 15, "Curtidas": 78, "sentimento": "Positivo", "topic": 1, "kw": "reshoring; supply chain", "url": "https://twitter.com/GovernorVA74/status/1999910233502556318", "Respostas": 8, "Eng": 101}, {"Data": "2021-03-23 00:00:00", "Ano": "2021", "text": "Além disso, ele submete o PNAE às reservas de mercado das grandes indústrias e prejudica a sustentabilidade de comunidades indígenas, quilombolas, ribeirinhas e a agricultura familiar, por desvincular o fornecimento da alimentação à produção local. Não ao Projeto de Lei 4195/12!", "Retweets": 9, "Curtidas": 88, "sentimento": "Neutro", "topic": 6, "kw": "producao local; sustentabilidade", "url": "https://twitter.com/samiabomfim/status/1374448295188172804", "Respostas": 0, "Eng": 97}, {"Data": "2021-12-01 00:00:00", "Ano": "2021", "text": "Many rich countries have reduced carbon emissions. How much of that reduction is genuine, and how much is just offshoring production elsewhere?\nThe answer (by @_HannahRitchie ) may surprise you.\nhttps://t.co/DtVxKsBoei", "Retweets": 24, "Curtidas": 64, "sentimento": "Positivo", "topic": 3, "kw": "offshoring; emission; carbon", "url": "https://twitter.com/TimHarford/status/1466066306227060743", "Respostas": 0, "Eng": 88}], "total": 3555, "anos": ["2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "date_range": "2018-01-02 00:00:00 → 2025-12-31 00:00:00", "top50_engagement": 17814};
+// === Dados da reprocessação LDA + VADER (cross-tab tópico×sentimento + agrupamento semântico) ===
+const SEM = {"topic_labels":["T1: Relocation & Sustentabilidade","T2: Offshoring & Mfg Strategy","T3: Nearshoring Latam (PT/ES)","T4: Offshoring & Carbon Emissions","T5: Reshoring + Sustentabilidade","T6: Reshoring & Geopolítica China"],"topic_words_short":[["relocation","sustainability","full","vietnam","job","technology","development","usa"],["supply","chain","offshoring","manufacturing","trade","strategy","eu","deslocalização"],["supply","chain","nearshoring","mexico","la","el","en","medical"],["offshoring","carbon","emissions","co","local","uk","china","produção"],["supply","chain","nearshoring","sustainability","manufacturing","supplychain","reshoring","logistics"],["supply","chain","reshoring","china","manufacturing","us","global","friendshoring"]],"topic_total":{"1":239,"2":209,"3":184,"4":806,"5":851,"6":1266},"topic_sent_pct":{"1":{"Positivo":46.4,"Neutro":37.2,"Negativo":16.3},"2":{"Positivo":32.5,"Neutro":30.6,"Negativo":36.8},"3":{"Positivo":21.7,"Neutro":49.5,"Negativo":28.8},"4":{"Positivo":41.2,"Neutro":26.1,"Negativo":32.8},"5":{"Positivo":66.2,"Neutro":23.6,"Negativo":10.2},"6":{"Positivo":49.9,"Neutro":18.0,"Negativo":32.1}},"topic_avg_compound":{"1":0.167,"2":-0.006,"3":-0.04,"4":0.062,"5":0.311,"6":0.12},"groups_ordered":["Supply Chain","Reshoring","Offshoring","Carbon Footprint","Nearshoring","Relocation","Sustainability","Emissions","Friendshoring","Manufacturing Strategy","Climate","Local Production","Life Cycle"],"group_counts":{"Supply Chain":1690,"Reshoring":830,"Offshoring":804,"Carbon Footprint":727,"Nearshoring":638,"Relocation":583,"Sustainability":387,"Emissions":317,"Friendshoring":240,"Manufacturing Strategy":151,"Climate":148,"Local Production":117,"Life Cycle":37},"group_cooc_matrix":[[0,584,232,20,413,183,23,11,173,106,13,0,1],[584,0,26,35,102,2,68,10,29,0,4,0,2],[232,26,0,433,24,0,29,234,9,0,58,0,6],[20,35,433,0,37,146,22,256,21,13,86,21,2],[413,102,24,37,0,4,68,14,32,1,2,0,5],[183,2,0,146,4,0,126,44,1,7,35,0,21],[23,68,29,22,68,126,0,10,6,3,11,63,0],[11,10,234,256,14,44,10,0,1,0,32,8,2],[173,29,9,21,32,1,6,1,0,0,14,0,0],[106,0,0,13,1,7,3,0,0,0,0,0,1],[13,4,58,86,2,35,11,32,14,0,0,26,1],[0,0,0,21,0,0,63,8,0,0,26,0,0],[1,2,6,2,5,21,0,2,0,1,1,0,0]],"group_cooc_labels":["Supply Chain","Reshoring","Offshoring","Carbon Footprint","Nearshoring","Relocation","Sustainability","Emissions","Friendshoring","Manufacturing Strategy","Climate","Local Production","Life Cycle"],"group_sent":{"Supply Chain":{"Positivo":882,"Negativo":481,"Neutro":327},"Reshoring":{"Positivo":438,"Neutro":194,"Negativo":198},"Offshoring":{"Neutro":131,"Negativo":321,"Positivo":352},"Carbon Footprint":{"Positivo":333,"Negativo":227,"Neutro":167},"Nearshoring":{"Positivo":342,"Negativo":100,"Neutro":196},"Relocation":{"Positivo":302,"Negativo":141,"Neutro":140},"Sustainability":{"Positivo":222,"Neutro":126,"Negativo":39},"Emissions":{"Positivo":155,"Negativo":117,"Neutro":45},"Friendshoring":{"Positivo":123,"Neutro":57,"Negativo":60},"Manufacturing Strategy":{"Positivo":90,"Neutro":35,"Negativo":26},"Climate":{"Negativo":55,"Positivo":51,"Neutro":42},"Local Production":{"Neutro":81,"Negativo":24,"Positivo":12},"Life Cycle":{"Positivo":25,"Neutro":10,"Negativo":2}},"semantic_mapping":{"Carbon Footprint":["carbon","carbono","carbon footprint","co2","ghg","low carbon","descarbonizacao","decarbonization"],"Climate":["climate","climate change","clima"],"Emissions":["emission","emissions","emissao","pollutant"],"Sustainability":["sustainability","sustentabilidade"],"Supply Chain":["supply chain","supply chain relocation"],"Reshoring":["reshoring","backshoring"],"Nearshoring":["nearshoring"],"Offshoring":["offshoring"],"Friendshoring":["friendshoring"],"Relocation":["relocation","deslocalizacao"],"Local Production":["producao local"],"Manufacturing Strategy":["manufacturing strategy","location strategy"],"Life Cycle":["life cycle","lifecycle"]}};
+
+const TOPIC_LABELS = SEM.topic_labels;
+
+// Override LDA fields em DATA com a reprocessação (mantém coerência das visões existentes)
+const LDA_NEW = {"topic_words":[["relocation","sustainability","full","vietnam","job","technology","development","usa","every","jobs"],["supply","chain","offshoring","manufacturing","trade","strategy","eu","deslocalização","global","friendshoring"],["supply","chain","nearshoring","mexico","la","el","en","medical","manufacturing","offshoring"],["offshoring","carbon","emissions","co","local","uk","china","produção","energy","tax"],["supply","chain","nearshoring","sustainability","manufacturing","supplychain","reshoring","logistics","global","strategy"],["supply","chain","reshoring","china","manufacturing","us","global","friendshoring","chains","companies"]],"topic_dist":{"1":239,"2":209,"3":184,"4":806,"5":851,"6":1266},"topic_by_year":{"2018":{"5":84,"6":52,"4":52,"2":14,"1":38,"3":33},"2019":{"4":159,"2":38,"6":52,"5":56,"1":32,"3":1},"2020":{"4":97,"5":93,"2":34,"6":193,"3":9,"1":30},"2021":{"6":177,"2":41,"4":121,"5":145,"3":17,"1":28},"2022":{"3":22,"4":104,"6":190,"5":148,"2":32,"1":40},"2023":{"6":183,"5":123,"4":53,"3":55,"1":29,"2":25},"2024":{"6":151,"4":120,"5":94,"2":7,"3":14,"1":17},"2025":{"4":100,"6":268,"5":108,"3":33,"2":18,"1":25}}};
+DATA.topic_words = LDA_NEW.topic_words;
+DATA.topic_dist = LDA_NEW.topic_dist;
+DATA.topic_by_year = LDA_NEW.topic_by_year;
+const ANOS = DATA.anos;
+const COLORS = ['#2a9d8f','#e76f51','#e9c46a','#264653','#8ab17d','#f4a261','#6a4c93','#457b9d'];
+const SENT_COLORS = {'Positivo':'#2ecc71','Neutro':'#95a5a6','Negativo':'#e74c3c'};
+
+let charts = {};
+
+function fmt(n){ if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (Math.round(n/100)/10)+'K'; return n.toLocaleString('pt-BR'); }
+function getSentClass(s){ if(s==='Positivo') return 'badge-pos'; if(s==='Negativo') return 'badge-neg'; return 'badge-neu'; }
+function currentAno(){ const a = document.getElementById('filtroAno').value; return a==='all'?null:a; }
+
+function applyFilter(){
+  const ano = currentAno();
+  renderKPIs(ano);
+  updateVol(ano);
+  updateSentDist(ano);
+  updateTopics(ano);
+  renderTable(ano);
+}
+
+// ── KPIs ─────────────────────────────────────────────────────────────────────
+function renderKPIs(ano){
+  const vol = ano ? (DATA.vol_ano[ano]||0) : DATA.total;
+  let pos=0,neg=0,neu=0;
+  if(ano){ const s = DATA.sent_by_year[ano]||{}; pos=s.Positivo||0; neg=s.Negativo||0; neu=s.Neutro||0; }
+  else { pos=DATA.sent_dist.Positivo; neg=DATA.sent_dist.Negativo; neu=DATA.sent_dist.Neutro; }
+  const total = pos+neg+neu||1;
+  const avg = ano ? (DATA.avg_sent_year[ano]||0) : Object.values(DATA.avg_sent_year).reduce((a,b)=>a+b,0)/Object.keys(DATA.avg_sent_year).length;
+  const topKW = Object.entries(DATA.kw_freq).sort((a,b)=>b[1]-a[1])[0];
+  const topCooc = DATA.cooc_top20[0];
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total de Tweets</div><div class="kpi-value">${fmt(vol)}</div><div class="kpi-sub">${ano||'2018–2025'}</div></div>
+    <div class="kpi pos"><div class="kpi-label">Tweets Positivos</div><div class="kpi-value">${fmt(pos)}</div><div class="kpi-sub">${((pos/total)*100).toFixed(1)}% do período</div></div>
+    <div class="kpi neg"><div class="kpi-label">Tweets Negativos</div><div class="kpi-value">${fmt(neg)}</div><div class="kpi-sub">${((neg/total)*100).toFixed(1)}% do período</div></div>
+    <div class="kpi neu"><div class="kpi-label">Sentimento Médio</div><div class="kpi-value">${avg.toFixed(3)}</div><div class="kpi-sub">Compound VADER (-1 a +1)</div></div>
+    <div class="kpi"><div class="kpi-label">Keyword Mais Frequente</div><div class="kpi-value" style="font-size:15px;line-height:1.25">${topKW[0]}</div><div class="kpi-sub">${fmt(topKW[1])} menções</div></div>
+    <div class="kpi grpB"><div class="kpi-label">Par Co-ocorrente Líder</div><div class="kpi-value" style="font-size:13px;line-height:1.25">${topCooc.k1} × ${topCooc.k2}</div><div class="kpi-sub">${fmt(topCooc.count)} co-ocorrências</div></div>
+  `;
+}
+
+// ── VOLUME ────────────────────────────────────────────────────────────────────
+function initVol(){
+  const ctx = document.getElementById('chartVol').getContext('2d');
+  charts.vol = new Chart(ctx,{
+    type:'bar',
+    data:{ labels:ANOS, datasets:[{
+      label:'Tweets',data:ANOS.map(a=>DATA.vol_ano[a]||0),
+      backgroundColor:COLORS[0]+'CC',borderColor:COLORS[0],borderWidth:1,borderRadius:4,
+      datalabels:{ anchor:'end', align:'end', offset:2, font:{size:11,weight:'bold'}, color:'#0f3d3e', formatter: v => v>0?v:'' }
+    },{
+      label:'Tendência',data:ANOS.map(a=>DATA.vol_ano[a]||0),
+      type:'line',borderColor:COLORS[1],borderWidth:2,tension:.4,fill:false,pointRadius:4,
+      datalabels:{ display: false }
+    }]},
+    options:{ responsive:true,maintainAspectRatio:false,
+      plugins:{ legend:{position:'top'}, datalabels:{} },
+      scales:{y:{beginAtZero:true, grace:'12%'}}
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+function updateVol(ano){
+  const d = ANOS.map(a=>(!ano||a===ano)?(DATA.vol_ano[a]||0):0);
+  charts.vol.data.datasets[0].data=d; charts.vol.data.datasets[1].data=d; charts.vol.update('none');
+}
+
+// ── SENTIMENTO TEMPORAL ───────────────────────────────────────────────────────
+function sentPct(a, tipo){
+  const s=DATA.sent_by_year[a]||{};
+  const t=(s.Positivo||0)+(s.Negativo||0)+(s.Neutro||0);
+  return t ? +((s[tipo]||0)/t*100).toFixed(1) : 0;
+}
+function initSentTime(){
+  const ctx = document.getElementById('chartSent').getContext('2d');
+  charts.sentTime = new Chart(ctx,{
+    type:'line',
+    data:{ labels:ANOS, datasets:[
+      { label:'Compound Médio',data:ANOS.map(a=>+(DATA.avg_sent_year[a]||0).toFixed(4)),borderColor:'#2a9d8f',backgroundColor:'#2a9d8f28',fill:true,tension:.4,borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#2a9d8f',yAxisID:'y'},
+      { label:'Positivos (%)',data:ANOS.map(a=>sentPct(a,'Positivo')),borderColor:'#2ecc71',borderDash:[6,3],fill:false,tension:.4,borderWidth:2,pointRadius:4,yAxisID:'y2'},
+      { label:'Negativos (%)',data:ANOS.map(a=>sentPct(a,'Negativo')),borderColor:'#e74c3c',borderDash:[5,3],fill:false,tension:.4,borderWidth:2,pointRadius:4,yAxisID:'y2'},
+      { label:'Neutros (%)',data:ANOS.map(a=>sentPct(a,'Neutro')),borderColor:'#95a5a6',borderDash:[3,3],fill:false,tension:.4,borderWidth:2,pointRadius:4,yAxisID:'y2'}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'top', labels:{usePointStyle:true,pointStyleWidth:16,boxHeight:8}}, datalabels:{display:false} },
+      scales:{
+        y:{beginAtZero:false, title:{display:true,text:'Compound'}, position:'left'},
+        y2:{position:'right', title:{display:true,text:'% Tweets'}, grid:{display:false}, ticks:{callback:v=>v+'%'}}
+      }
+    }
+  });
+}
+
+// ── SENT DIST ────────────────────────────────────────────────────────────────
+function initSentDist(){
+  const ctx = document.getElementById('chartSentDist').getContext('2d');
+  const s = DATA.sent_dist;
+  charts.sentDist = new Chart(ctx,{
+    type:'doughnut',
+    data:{ labels:['Positivo','Neutro','Negativo'], datasets:[{
+      data:[s.Positivo,s.Neutro,s.Negativo],
+      backgroundColor:['#2ecc71','#95a5a6','#e74c3c'], borderColor:'#fff', borderWidth:2
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{
+        legend:{position:'right', labels:{usePointStyle:true,padding:12,font:{size:12}}},
+        datalabels:{color:'#fff',font:{weight:'bold',size:12},formatter:(v,ctx)=>{
+          const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ((v/t)*100).toFixed(1)+'%';
+        }},
+        tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+': '+fmt(c.parsed)+' ('+((c.parsed/t)*100).toFixed(1)+'%)';}}}
+      }
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+function updateSentDist(ano){
+  const s = ano ? (DATA.sent_by_year[ano]||{Positivo:0,Neutro:0,Negativo:0}) : DATA.sent_dist;
+  charts.sentDist.data.datasets[0].data = [s.Positivo,s.Neutro,s.Negativo];
+  charts.sentDist.update('none');
+}
+
+// ── TOPICS DOUGHNUT ───────────────────────────────────────────────────────────
+function initTopics(){
+  const ctx = document.getElementById('chartTopics').getContext('2d');
+  const d = Object.keys(DATA.topic_dist).sort().map(k=>DATA.topic_dist[k]);
+  charts.topics = new Chart(ctx,{
+    type:'doughnut',
+    data:{ labels:TOPIC_LABELS, datasets:[{
+      data:d, backgroundColor:COLORS.slice(0,6), borderColor:'#fff', borderWidth:2
+    }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'55%',
+      plugins:{
+        legend:{position:'right', labels:{usePointStyle:true,padding:8,font:{size:10},boxWidth:10}},
+        datalabels:{color:'#fff',font:{weight:'bold',size:10},formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);const p=(v/t)*100;return p>3?p.toFixed(0)+'%':'';}},
+        tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+': '+fmt(c.parsed)+' ('+((c.parsed/t)*100).toFixed(1)+'%)';}}}
+      }
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+function updateTopics(ano){
+  const src = ano ? (DATA.topic_by_year[ano]||{}) : DATA.topic_dist;
+  const d = Object.keys(src).sort().map(k=>src[k]||0);
+  charts.topics.data.datasets[0].data = d;
+  charts.topics.update('none');
+}
+
+// ── TOP KW SEMÂNTICO (horizontal, sentimento empilhado, total ao final) ─────
+function initKW(){
+  const groups = SEM.groups_ordered;
+  const totals = groups.map(g=>(SEM.group_sent[g].Positivo||0)+(SEM.group_sent[g].Neutro||0)+(SEM.group_sent[g].Negativo||0));
+  const maxTot = Math.max(...totals);
+  const ctx = document.getElementById('chartKW').getContext('2d');
+  charts.kw = new Chart(ctx,{
+    type:'bar',
+    data:{ labels:groups, datasets:[
+      {label:'Positivo',data:groups.map(g=>SEM.group_sent[g].Positivo||0),backgroundColor:'#2ecc71',stack:'s',datalabels:{display:false}},
+      {label:'Neutro', data:groups.map(g=>SEM.group_sent[g].Neutro||0), backgroundColor:'#95a5a6',stack:'s',datalabels:{display:false}},
+      {label:'Negativo',data:groups.map(g=>SEM.group_sent[g].Negativo||0),backgroundColor:'#e74c3c',stack:'s',
+        datalabels:{display:true,anchor:'end',align:'end',color:'#0f3d3e',font:{weight:700,size:11},
+          formatter:(v,ctx)=>totals[ctx.dataIndex].toLocaleString('pt-BR'),padding:{left:6}}
+      }
+    ]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{padding:{right:60}},
+      plugins:{
+        legend:{position:'top',labels:{usePointStyle:true,boxWidth:10,font:{size:11}}},
+        tooltip:{callbacks:{
+          label:c=>`${c.dataset.label}: ${c.parsed.x.toLocaleString('pt-BR')} tweets`,
+          footer:items=>'Total: '+items.reduce((a,b)=>a+b.parsed.x,0).toLocaleString('pt-BR')
+        }}
+      },
+      scales:{
+        x:{stacked:true,beginAtZero:true,suggestedMax:Math.ceil(maxTot*1.08),ticks:{font:{size:11}}},
+        y:{stacked:true,ticks:{font:{size:11,weight:'600'}}}
+      }
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+
+// ── COOC TOP PAIRS ───────────────────────────────────────────────────────────
+function initCooc(){
+  const pairs = DATA.cooc_top20.slice(0,20);
+  const labels = pairs.map(p=>`${p.k1} × ${p.k2}`);
+  const values = pairs.map(p=>p.count);
+  const ctx = document.getElementById('chartCooc').getContext('2d');
+  charts.cooc = new Chart(ctx,{
+    type:'bar',
+    data:{labels, datasets:[{label:'Co-ocorrências',data:values,backgroundColor:'#e76f51CC',borderColor:'#e76f51',borderWidth:1,borderRadius:3}]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',color:'#a83f1f',font:{size:10,weight:'bold'},formatter:v=>fmt(v)}},
+      scales:{x:{beginAtZero:true,grace:'15%'},y:{ticks:{font:{size:10}}}}
+    },
+    plugins:[ChartDataLabels]
+  });
+}
+
+// ── EVOLUÇÃO KW (linhas) ─────────────────────────────────────────────────────
+function initKWEvol(){
+  const kws = DATA.top10_kws.slice(0,6);
+  const datasets = kws.map((kw,i)=>({
+    label: kw, data: ANOS.map(a=>DATA.kw_by_year[kw]?.[a]||0),
+    borderColor: COLORS[i%COLORS.length], backgroundColor: COLORS[i%COLORS.length]+'20',
+    borderWidth:2.2, tension:.35, pointRadius:3, pointHoverRadius:6, fill:false
+  }));
+  const ctx = document.getElementById('chartKWEvol').getContext('2d');
+  charts.kwEvol = new Chart(ctx,{
+    type:'line', data:{labels:ANOS, datasets},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,font:{size:10}}},datalabels:{display:false}},
+      scales:{y:{beginAtZero:true}}
+    }
+  });
+}
+
+// ── TOPIC PER YEAR STACKED 100% ──────────────────────────────────────────────
+function initTopicYear(){
+  const datasets = [];
+  for(let i=1;i<=6;i++){
+    datasets.push({
+      label: TOPIC_LABELS[i-1],
+      data: ANOS.map(a=>{
+        const s = DATA.topic_by_year[a]||{};
+        const tot = Object.values(s).reduce((x,y)=>x+y,0)||1;
+        return +(((s[String(i)]||0)/tot)*100).toFixed(1);
+      }),
+      backgroundColor: COLORS[(i-1)%COLORS.length],
+      stack:'t'
+    });
+  }
+  const ctx = document.getElementById('chartTopicYear').getContext('2d');
+  charts.topicYear = new Chart(ctx,{
+    type:'bar', data:{labels:ANOS, datasets},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:6}},datalabels:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'}}},
+      scales:{x:{stacked:true},y:{stacked:true,max:100,ticks:{callback:v=>v+'%'}}}
+    }
+  });
+}
+
+// ── TOPIC WORDS ──────────────────────────────────────────────────────────────
+function renderTopicWords(){
+  const el = document.getElementById('topicWords');
+  el.innerHTML = DATA.topic_words.map((words,i)=>`
+    <div class="topic-block">
+      <h4 style="color:${COLORS[i]}">${TOPIC_LABELS[i]} <span style="font-weight:400;color:#999;font-size:10px">(${fmt(DATA.topic_dist[String(i+1)]||0)} tweets)</span></h4>
+      <div>${words.map(w=>`<span class="topic-word">${w}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+// ── HEATMAP SEMÂNTICO (13 × 13 grupos consolidados, escala log) ─────────────
+function renderHeatmap(){
+  const labels = SEM.group_cooc_labels;
+  const mat = SEM.group_cooc_matrix;
+  let max = 0; mat.forEach(r=>r.forEach(v=>{if(v>max)max=v;}));
+  const colorFor = v => {
+    if(v===0) return '#f8f9fb';
+    const t = Math.log(v+1)/Math.log(max+1);
+    const r = Math.round(232 - (232-15)*t);
+    const g = Math.round(245 - (245-61)*t);
+    const b = Math.round(242 - (242-62)*t);
+    return `rgb(${r},${g},${b})`;
+  };
+  const textFor = v => {
+    if(v===0) return '#ccc';
+    const t = Math.log(v+1)/Math.log(max+1);
+    return t>0.5 ? '#fff' : '#0f3d3e';
+  };
+  const container = document.getElementById('heatmap');
+  let html = `<div class="heatmap" style="grid-template-columns:150px repeat(${labels.length},minmax(36px,1fr));min-width:720px">`;
+  html += `<div></div>`;
+  labels.forEach(c=>{ html += `<div class="heat-label" style="font-size:9px;text-align:center;padding:4px 1px;line-height:1.1;word-break:break-word;color:#0f3d3e;font-weight:600">${c}</div>`;});
+  labels.forEach((r,i)=>{
+    html += `<div class="heat-label" style="font-size:10px;color:#0f3d3e">${r}</div>`;
+    labels.forEach((c,j)=>{
+      const v = mat[i][j];
+      const isDiag = i===j;
+      const bg = isDiag ? '#0f3d3e' : colorFor(v);
+      const color = isDiag ? '#fff' : textFor(v);
+      const txt = isDiag ? '—' : (v||'');
+      html += `<div class="heat-cell" style="background:${bg};color:${color};padding:7px 2px;font-size:10px" title="${r} ↔ ${c}: ${v}">${txt}</div>`;
+    });
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+// ── TOP TWEETS TABLE ─────────────────────────────────────────────────────────
+let _sortState = {col:'Eng',dir:'desc'};
+function renderTable(ano){
+  const body = document.getElementById('tweetBody');
+  let rows = DATA.top_tweets.slice();
+  if(ano) rows = rows.filter(r=>r.Ano===ano);
+  rows.sort((a,b)=>{
+    const c = _sortState.col, d = _sortState.dir==='asc'?1:-1;
+    let va=a[c], vb=b[c];
+    if(c==='Data'){ va=new Date(va); vb=new Date(vb); }
+    if(typeof va==='string') return d*(va<vb?-1:va>vb?1:0);
+    return d*((va||0)-(vb||0));
+  });
+  body.innerHTML = rows.map(r=>{
+    const kws = (r.kw||'').split(';').map(k=>k.trim()).filter(Boolean).map(k=>`<span class="kw-pill">${k}</span>`).join(' ');
+    const esc = (r.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<tr>
+      <td>${(r.Data||'').substring(0,10)}</td>
+      <td>${r.Ano}</td>
+      <td style="max-width:420px">${r.url?`<a href="${r.url}" target="_blank" rel="noopener">${esc}</a>`:esc}</td>
+      <td>${fmt(r.Retweets||0)}</td>
+      <td>${fmt(r.Curtidas||0)}</td>
+      <td>${fmt(r.Respostas||0)}</td>
+      <td><b>${fmt(r.Eng||0)}</b></td>
+      <td><span class="badge ${getSentClass(r.sentimento)}">${r.sentimento}</span></td>
+      <td>T${r.topic}</td>
+      <td>${kws}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="10" style="text-align:center;padding:20px;color:#999">Sem tweets para o ano selecionado no top 50.</td></tr>`;
+}
+function sortTable(col){
+  if(_sortState.col===col) _sortState.dir = _sortState.dir==='asc'?'desc':'asc';
+  else { _sortState.col=col; _sortState.dir='desc'; }
+  renderTable(currentAno());
+}
+window.sortTable = sortTable;
+
+// ── TABELA TÓPICO × SENTIMENTO ──────────────────────────────────────────────
+function compoundColor(v){
+  if(v>=0.2) return '#1e8449';
+  if(v>=0.05) return '#27ae60';
+  if(v>=-0.05) return '#7f8c8d';
+  if(v>=-0.2) return '#d35400';
+  return '#c0392b';
+}
+function renderTopicSentTable(){
+  const tbody = document.getElementById('topicSentTbody');
+  let rows = '';
+  for(let i=1;i<=6;i++){
+    const lab = SEM.topic_labels[i-1];
+    const tot = SEM.topic_total[i];
+    const pct = SEM.topic_sent_pct[i];
+    const comp = SEM.topic_avg_compound[i];
+    const words = SEM.topic_words_short[i-1].slice(0,6).join(', ');
+    rows += `<tr>
+      <td>
+        <div class="tt-name" style="color:${COLORS[i-1]}">${lab}</div>
+        <div class="tt-words">palavras: ${words}…</div>
+      </td>
+      <td><b>${tot.toLocaleString('pt-BR')}</b></td>
+      <td><span class="pct-pos">${pct.Positivo}%</span></td>
+      <td><span class="pct-neu">${pct.Neutro}%</span></td>
+      <td><span class="pct-neg">${pct.Negativo}%</span></td>
+      <td>
+        <div class="bar-stacked">
+          <span style="background:#2ecc71;width:${pct.Positivo}%">${pct.Positivo>=8?pct.Positivo+'%':''}</span>
+          <span style="background:#95a5a6;width:${pct.Neutro}%">${pct.Neutro>=8?pct.Neutro+'%':''}</span>
+          <span style="background:#e74c3c;width:${pct.Negativo}%">${pct.Negativo>=8?pct.Negativo+'%':''}</span>
+        </div>
+      </td>
+      <td><span class="compound-pill" style="background:${compoundColor(comp)}">${comp>=0?'+':''}${comp.toFixed(3)}</span></td>
+    </tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+// ── DICIONÁRIO SEMÂNTICO ─────────────────────────────────────────────────────
+function renderMapping(){
+  const c = document.getElementById('mappingGrid');
+  let html = '';
+  Object.entries(SEM.semantic_mapping).forEach(([grp,terms])=>{
+    html += `<div class="mapping-card"><h4>${grp} <span style="color:#aaa;font-weight:400">(${(SEM.group_counts[grp]||0).toLocaleString('pt-BR')} tweets)</span></h4>`;
+    terms.forEach(t => html += `<span class="mapping-pill">${t}</span>`);
+    html += '</div>';
+  });
+  c.innerHTML = html;
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+function boot(){
+  renderKPIs(null);
+  initVol();
+  initSentTime();
+  initSentDist();
+  initTopics();
+  renderTopicSentTable();
+  initKW();
+  initCooc();
+  initKWEvol();
+  initTopicYear();
+  renderTopicWords();
+  renderHeatmap();
+  renderMapping();
+  renderTable(null);
+}
+boot();
+</script>
+</body>
+</html>
